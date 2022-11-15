@@ -23,6 +23,30 @@ class ColonyCounter:
 
         self.main()
         
+    def preprocessing_function(self, final, center_coordinates):
+        kernel = np.ones((2, 2), np.uint8)
+        img_dilation = cv2.dilate(final, kernel, iterations= 5)
+        erosion = cv2.erode(img_dilation, kernel, iterations= 3)
+        final = cv2.circle(erosion, center_coordinates, self.radius, self.color, self.thickness)
+        
+        grey_final = cv2.cvtColor(final, cv2.COLOR_RGB2GRAY)
+        grey_final = cv2.subtract(255, grey_final)
+
+        return grey_final, final
+
+    def counter_function(self, grey_final):
+        params = cv2.SimpleBlobDetector_Params()
+        params.filterByCircularity = True
+        params.minCircularity = 0.09
+        params.filterByConvexity = True
+        params.minConvexity = 0.02
+        params.filterByInertia = True
+        params.minInertiaRatio = 0.001
+        
+        detector = cv2.SimpleBlobDetector_create(params)
+        keypoints = detector.detect(grey_final)
+
+        return len(keypoints)
 
     def main(self):
 
@@ -41,28 +65,11 @@ class ColonyCounter:
 
 
             # 2 - preprocessing
-            kernel = np.ones((2, 2), np.uint8)
-            img_dilation = cv2.dilate(final, kernel, iterations= 5)
-            erosion = cv2.erode(img_dilation, kernel, iterations= 3)
-            final = cv2.circle(erosion, center_coordinates, self.radius, self.color, self.thickness)
-            
-            grey_final = cv2.cvtColor(final, cv2.COLOR_RGB2GRAY)
-            grey_final = cv2.subtract(255, grey_final)
+            grey_final, final = self.preprocessing_function(final, center_coordinates)
 
 
             # 3 - counting
-            params = cv2.SimpleBlobDetector_Params()
-            params.filterByCircularity = True
-            params.minCircularity = 0.09
-            params.filterByConvexity = True
-            params.minConvexity = 0.02
-            params.filterByInertia = True
-            params.minInertiaRatio = 0.001
-            
-            detector = cv2.SimpleBlobDetector_create(params)
-            keypoints = detector.detect(grey_final)
-
-            number_of_blobs = len(keypoints)
+            number_of_blobs = self.counter_function(grey_final)
 
 
             # 4 - plotting
