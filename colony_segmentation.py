@@ -1,15 +1,16 @@
+import glob
+
+import cv2
 import matplotlib.pyplot as plt
 import numpy as np
-import glob
-import cv2
 
 path = './'
 images = sorted(glob.glob(f'{path}/*.jpeg'))
 
 for image in images:
-    nemo = cv2.imread(image)
+    nemo_std = cv2.imread(image)
 
-    nemo = cv2.cvtColor(nemo, cv2.COLOR_BGR2HSV)
+    nemo = cv2.cvtColor(nemo_std, cv2.COLOR_BGR2HSV)
 
     light_orange = (25,20,200)
     dark_orange = (35, 80, 230)
@@ -48,9 +49,13 @@ for image in images:
 
     display = 'Colonies counted: ' + str(i)
 
-    plt.imshow(final)
+    f, axarr = plt.subplots(1,2)
+    axarr[0].imshow(nemo_std)
+    axarr[0].set_title('Before segmentation')
+    axarr[1].imshow(final)
+    axarr[1].set_title('After segmentation')
 
-    plt.text(350, -50, display, style='italic', bbox={
+    plt.text(175, 1000, display, style='italic', bbox={
         'facecolor': 'white', 'alpha': 0.5, 'pad': 10})
 
     plt.show()
