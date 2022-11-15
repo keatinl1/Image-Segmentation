@@ -17,6 +17,10 @@ class ColonyCounter:
         self.light_orange = (25,20,200)
         self.dark_orange = (220, 240, 235)
 
+        self.radius = 570
+        self.color = (0, 0, 0)
+        self.thickness = 500        
+
         self.main()
         
 
@@ -32,19 +36,15 @@ class ColonyCounter:
             result = cv2.bitwise_and(nemo, nemo, mask=mask)
             final = cv2.cvtColor(result, cv2.COLOR_HSV2RGB)
 
-            height, width, depth = final.shape
+            height, width, _ = final.shape
             center_coordinates = (int(width/2), int(height/2))
-
-            radius = 570
-            color = (0, 0, 0)
-            thickness = 500
 
 
             # 2 - preprocessing
             kernel = np.ones((2, 2), np.uint8)
             img_dilation = cv2.dilate(final, kernel, iterations= 5)
-            erosion = cv2.erode(img_dilation, kernel, iterations = 3)
-            final = cv2.circle(erosion, center_coordinates, radius, color, thickness)
+            erosion = cv2.erode(img_dilation, kernel, iterations= 3)
+            final = cv2.circle(erosion, center_coordinates, self.radius, self.color, self.thickness)
             
             grey_final = cv2.cvtColor(final, cv2.COLOR_RGB2GRAY)
             grey_final = cv2.subtract(255, grey_final)
