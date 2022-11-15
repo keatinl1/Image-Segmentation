@@ -1,5 +1,5 @@
 import glob
-
+from matplotlib.pyplot import figure
 import cv2
 import matplotlib.pyplot as plt
 import numpy as np
@@ -54,8 +54,9 @@ for image in images:
     axarr[0].set_title('Before segmentation')
     axarr[1].imshow(final)
     axarr[1].set_title('After segmentation')
+    f.set_size_inches((15, 7.5))
 
-    plt.text(175, 1000, display, style='italic', bbox={
+    plt.text(300, 1000, display, style='italic', bbox={
         'facecolor': 'white', 'alpha': 0.5, 'pad': 10})
 
     plt.show()
