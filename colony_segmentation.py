@@ -9,7 +9,7 @@ class ColonyCounter:
 
     def __init__(self):
         # 0 - parse folder
-        self.path = './'
+        self.path = './input_images'
         self.images = sorted(glob.glob(f'{self.path}/*.jpeg'))
 
         # upper and lower filter colours
