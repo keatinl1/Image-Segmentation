@@ -13,7 +13,7 @@ class ColonyCounter:
         self.images = sorted(glob.glob(f'{self.path}/*.jpeg'))
 
         # upper and lower filter colours
-        self.light_orange = (25,20,200)
+        self.light_orange = (25,10,200)
         self.dark_orange = (220, 240, 235)
 
         self.radius = 570
@@ -22,16 +22,19 @@ class ColonyCounter:
 
         self.main()
         
-    def preprocessing_function(self, final, center_coordinates):
+    def preprocessing_function(self, masked_rgb):
         '''
             need black spots on white for the counter to work
             hence we invert the colours
 
         '''
+        
+        height, width, _ = masked_rgb.shape
+        center_coordinates = (int(width/2) - 10, int(height/2)) # images are offcentered, hence - 10
 
         kernel = np.ones((2, 2), np.uint8)
-        dilated = cv2.dilate(final, kernel, iterations= 5)
-        eroded = cv2.erode(dilated, kernel, iterations= 3)
+        dilated = cv2.dilate(masked_rgb, kernel, iterations= 8)
+        eroded = cv2.erode(dilated, kernel, iterations= 4)
         
         rgb_colonies_alone = cv2.circle(eroded, center_coordinates, self.radius, self.color, self.thickness)
         grey_colonies_alone = cv2.cvtColor(rgb_colonies_alone, cv2.COLOR_RGB2GRAY)
@@ -40,17 +43,23 @@ class ColonyCounter:
 
         return inverse_grey_colonies, rgb_colonies_alone
 
-    def counter_function(self, grey_final):
+    def counter_function(self, inverse_grey_colonies):
+        '''
+            the requirements for what is a blob is v low which works 
+            because we've segmented everything else out anyway
+
+        '''
+        
         params = cv2.SimpleBlobDetector_Params()
         params.filterByCircularity = True
-        params.minCircularity = 0.09
+        params.minCircularity = 0.009
         params.filterByConvexity = True
-        params.minConvexity = 0.02
+        params.minConvexity = 0.002
         params.filterByInertia = True
-        params.minInertiaRatio = 0.001
+        params.minInertiaRatio = 0.0001
         
         detector = cv2.SimpleBlobDetector_create(params)
-        keypoints = detector.detect(grey_final)
+        keypoints = detector.detect(inverse_grey_colonies)
 
         return len(keypoints)
 
@@ -64,14 +73,12 @@ class ColonyCounter:
 
             mask = cv2.inRange(hsv_original, self.light_orange, self.dark_orange)
             masked_hsv = cv2.bitwise_and(hsv_original, hsv_original, mask=mask)
-            masked_rgb = cv2.cvtColor(masked_hsv, cv2.COLOR_HSV2RGB)
 
-            height, width, _ = masked_rgb.shape
-            center_coordinates = (int(width/2), int(height/2))
+            masked_rgb = cv2.cvtColor(masked_hsv, cv2.COLOR_HSV2RGB)
 
 
             # 2 - preprocessing
-            inverse_grey_colonies, rgb_colonies_alone = self.preprocessing_function(masked_rgb, center_coordinates)
+            inverse_grey_colonies, rgb_colonies_alone = self.preprocessing_function(masked_rgb)
 
 
             # 3 - counting
