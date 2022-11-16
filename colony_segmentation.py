@@ -21,7 +21,7 @@ class ColonyCounter:
         self.thickness = 500        
 
         self.main()
-        
+
     def preprocessing_function(self, masked_rgb):
         '''
             need black spots on white for the counter to work
@@ -49,7 +49,7 @@ class ColonyCounter:
             because we've segmented everything else out anyway
 
         '''
-        
+
         params = cv2.SimpleBlobDetector_Params()
         params.filterByCircularity = True
         params.minCircularity = 0.009
