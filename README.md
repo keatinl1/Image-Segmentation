@@ -1,5 +1,5 @@
 # colony-segmentation
-A project for segmenting bacteria colonies from images so you don't have to count them by hand
+A script for segmenting and counting bacteria colonies from images so you don't have to count them by hand
 
 Done in python using OpenCV
 
